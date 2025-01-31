@@ -16,7 +16,7 @@ def duolingo_request():
                     }
                 ).prepare())
     response = requests.get(
-            f"https://api.duolingo.com/profile/[{username}", # f"https://www.duolingo.com/api/1/users/show?username={username}",
+            f"https://api.duolingo.com/profile/{username}", # f"https://www.duolingo.com/api/1/users/show?username={username}",
             cookies=session.cookies
             )
 
