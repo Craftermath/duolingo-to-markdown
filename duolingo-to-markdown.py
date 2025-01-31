@@ -8,14 +8,15 @@ def duolingo_request():
     session.send(
             requests.Request(
                 'POST',
-                url = "https://www.duolingo.com/login",
+                url = "https://api.duolingo.com/?isLoggingIn=true",
+                # url = "https://www.duolingo.com/login",
                 json = {
                     "login": f"{username}",
                     "password": f"{password}"
                     }
                 ).prepare())
     response = requests.get(
-            f"https://www.duolingo.com/api/1/users/show?username={username}",
+            f"https://api.duolingo.com/profile/[{username}", # f"https://www.duolingo.com/api/1/users/show?username={username}",
             cookies=session.cookies
             )
 
