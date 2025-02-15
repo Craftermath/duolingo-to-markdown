@@ -1,17 +1,12 @@
 name: 'duolingo to markdown with fstrings'
-author: 'DiegoAichele'
+author: 'DiegoAichele and Carol' 
 description: 'Update your Duolingo progress to your GitHub Profile or any repo with a README.md'
 inputs:
   DUOLINGO_USERNAME:
     description: 'Duolingo Username'
     required: true
     default: DUOLINGO_USERNAME
-
-  DUOLINGO_PASSWORD:
-    description: 'Duolingo Password .'
-    required: true
-    default: DUOLINGO_PASSWORD
-    
+   
   DUOLINGO_LANGUAGE_LENGTH:
     description: 'How many language you want show.'
     required: false
@@ -27,7 +22,6 @@ runs:
   steps:
     - env:
         DUOLINGO_USERNAME: ${{ inputs.DUOLINGO_USERNAME }}
-        DUOLINGO_PASSWORD: ${{ inputs.DUOLINGO_PASSWORD }}
         DUOLINGO_LANGUAGE_LENGTH: ${{ inputs.DUOLINGO_LANGUAGE_LENGTH }}
         DUOLINGO_STREAK: ${{ inputs.DUOLINGO_STREAK }}
       run: python ${{ github.action_path }}/duolingo-to-markdown.py
