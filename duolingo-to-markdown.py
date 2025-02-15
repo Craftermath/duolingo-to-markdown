@@ -1,33 +1,19 @@
 import requests, os, sys
+from datetime import datetime
 
 
 def duolingo_request():
-    session = requests.Session()
     username = os.getenv('DUOLINGO_USERNAME')
-    password = os.getenv('DUOLINGO_PASSWORD')
-    session.send(
-            requests.Request(
-                'POST',
-                url = "https://api.duolingo.com/?isLoggingIn=true",
-                # url = "https://www.duolingo.com/login",
-                json = {
-                    "login": f"{username}",
-                    "password": f"{password}"
-                    }
-                ).prepare())
-    response = requests.get(
-            f"https://api.duolingo.com/profile/{username}", # f"https://www.duolingo.com/api/1/users/show?username={username}",
-            cookies=session.cookies
-            )
-
+    url = f"https://api.duolingo.com/profile/{username}"
+    response = requests.get(url)
     if response.status_code == 200:
-        response = response.json()
-        return response
+        data = response.json()
+        return data
     else:
         sys.exit(1)
 
 
-def get_duloingo_info(response):
+def get_duloingo_info(data):
     num_language = int(os.getenv('DUOLINGO_LANGUAGE_LENGTH'))
     lang_list = [
             (
@@ -40,7 +26,7 @@ def get_duloingo_info(response):
     return lang_list
 
 
-def update_readme(response):
+def update_readme(data):
     username = os.getenv('DUOLINGO_USERNAME')
     streak_str = os.getenv('DUOLINGO_STREAK')
     with open('README.md', 'r', encoding='utf-8') as file:
@@ -50,11 +36,11 @@ def update_readme(response):
                     'udfront.net/images/dc30aa15cf53a51f7b82e6f3b7e63c68.svg">'\
                     f'Duolingo username: <strong> {username} </strong> </br>' 
     if streak_str == 'true':
-        duolingo_line += f'Last Streak: <strong> {response["last_streak"]["length"]}'\
+        duolingo_line += f'Last Streak: <strong> {data["last_streak"]["length"]}'\
         '</strong> <img width="20.5px" height="15.5px" src="https://d35aaqx5ub95lt.'\
         'cloudfront.net/vendor/398e4298a3b39ce566050e5c041949ef.svg"></br>'
 
-    lang_list = get_duloingo_info(response)
+    lang_list = get_duloingo_info(data)
 
     duolingo_line += """<table align="center"><tr><th>Language</th><th>Level</th><th>Experience</th></tr>"""
     for lang in lang_list:
