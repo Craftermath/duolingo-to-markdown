@@ -13,10 +13,12 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: repo checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: python setup
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
@@ -24,12 +26,12 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requeriments.txt
+          
       - name: use duolingo account
         env:
           DUOLINGO_USERNAME: ${{ secrets.DUOLINGO_USERNAME }}
-          DUOLINGO_PASSWORD: ${{ secrets.DUOLINGO_PASSWORD }}
           DUOLINGO_STREAK: true
-          DUOLINGO_LANGUAGE_LENGTH: 2
+          DUOLINGO_LANGUAGE_LENGTH: 6
         run: python duolingo-to-markdown.py
 
       - name: commit changes
