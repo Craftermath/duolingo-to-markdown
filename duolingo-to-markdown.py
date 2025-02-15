@@ -6,25 +6,16 @@ def duolingo_request():
     username = os.getenv('DUOLINGO_USERNAME')
     url = f"https://api.duolingo.com/profile/{username}"
     response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        return data
-    else:
-        sys.exit(1)
+    data = response.json()
+    return data
 
 
 def get_duloingo_info(data):
     num_language = int(os.getenv('DUOLINGO_LANGUAGE_LENGTH'))
-    lang_list = [
-            (
-                language_list["language_string"],
-                language_list["level"],
-                language_list["points"]
-            ) for language_list in response["languages"]]  # if language_list["learning"] == True]
-    lang_list.sort(key=lambda lang:lang[2], reverse= True)  # guessing here
-    lang_list = [lang for lang in lang_list[:num_language]]
+    lang_list = [( language_list["language_string"],language_list["level"], language_list["points"] ) for language_list in response["languages"] if language_list["learning"] == True]
+    lang_list.sort(key=lambda lang:lang[2], reverse= True)
+    lang_list = [lang for lang in lang_list[:num_language] if lang[2]>0]
     return lang_list
-
 
 def update_readme(data):
     username = os.getenv('DUOLINGO_USERNAME')
