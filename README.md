@@ -13,7 +13,7 @@
 ## SETUP
 * A README.md file.
 * Duolingo Account.
-* Set up a GitHub Secret called  ```DUOLINGO_USERNAME``` with your Duolingo username and  ```DUOLINGO_PASSWORD``` with your Duolingo password.
+* Set up a GitHub Secret called  ```DUOLINGO_USERNAME``` with your Duolingo username.
 * Add a ```<!-- duolingo -->``` tag in your README.md file, with three blank lines below it. The Duolingo progress will be placed here.
 
 ## Instructions
@@ -30,17 +30,30 @@ on:
   workflow_dispatch:
 
 jobs:
-  duolingo:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: duolingo to markdown with fstrings
-        uses: Craftermath/duolingo-to-markdown@README
+      - name: repo checkout
+        uses: actions/checkout@v4
         with:
+          persist-credentials: false
+
+      - name: python setup
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: python packages installation
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requests beautifulsoup
+
+      - name: duolingo to markdown with fstrings
+        env:
           DUOLINGO_USERNAME: ${{ secrets.DUOLINGO_USERNAME }}
-          DUOLINGO_PASSWORD: ${{ secrets.DUOLINGO_PASSWORD }}
-          DUOLINGO_STREAK: true # Optional. Defaults is true. If you want to include your last streak on Duolingo.
-          DUOLINGO_LANGUAGE_LENGTH: 6 # Optional. Defaults to 2. Language you want to show (are sort of higher experience to lower).
+          DUOLINGO_LANGUAGE_LENGTH: 3 # Optional. Defaults to 2. Language you want to show (are sort of higher experience to lower).
+        run: python .github/scripts/duolingo-to-markdown.py
+
       - name: commit changes
         continue-on-error: true
         run: |
@@ -48,6 +61,7 @@ jobs:
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "Updated duolingo-to-markdown daily progress" -a
+
       - name: push changes
         continue-on-error: true
         uses: ad-m/github-push-action@v0.6.0
