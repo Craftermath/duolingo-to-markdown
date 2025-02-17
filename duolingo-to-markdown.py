@@ -1,45 +1,59 @@
 import requests, os, sys
-from datetime import datetime
+from bs4 import BeautifulSoup
 
 
 def duolingo_request():
     username = os.getenv('DUOLINGO_USERNAME')
-    url = f"https://api.duolingo.com/profile/{username}"
-    response = requests.get(url)
-    data = response.json()
-    return data
+    url = f"https://www.duolingo.com/2017-06-30/users?username={username}"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept': 'application/json',
+        'Accept-Language': 'en-US,en;q=0.9',
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        raise Exception(f"Failed to fetch data: {response.status_code} - {response.text}")
+
+    return response.json()
 
 
-def get_duloingo_info(data):
+def get_duolingo_info(data):
     num_language = int(os.getenv('DUOLINGO_LANGUAGE_LENGTH'))
-    lang_list = [( language_list["language_string"],language_list["level"], language_list["points"] ) for language_list in response["languages"] if language_list["learning"] == True]
-    lang_list.sort(key=lambda lang:lang[2], reverse= True)
-    lang_list = [lang for lang in lang_list[:num_language] if lang[2]>0]
-    return lang_list
+    user_data = data.get('users', [{}])[0]
+    streak = user_data['streak']
+    xp_per_language = {}
+    for course in user_data.get('courses', []):
+        name = course.get('title', 'Unknown')
+        xp = course.get('xp', 0)
+        if xp > 0:
+            xp_per_language[name] = xp
 
-def update_readme(data):
+    lang_list = list()
+    for lang, xp in xp_per_language.items():
+        lang_list.append((xp, lang))
+    lang_list.sort(reverse=True)
+    lang_list = lang_list[:num_language]
+    
+    return streak, lang_list
+
+def update_readme(streak, lang_list):
     username = os.getenv('DUOLINGO_USERNAME')
-    streak_str = os.getenv('DUOLINGO_STREAK')
     with open('README.md', 'r', encoding='utf-8') as file:
         readme = file.readlines()
     duolingo_line_index = readme.index('<!-- duolingo -->\n') + 1
     duolingo_line = '<p align="center"><img src="https://d35aaqx5ub95lt.clo'\
                     'udfront.net/images/dc30aa15cf53a51f7b82e6f3b7e63c68.svg">'\
                     f'Duolingo username: <strong> {username} </strong> </br>' 
-    if streak_str == 'true':
-        duolingo_line += f'Last Streak: <strong> {data["last_streak"]["length"]}'\
-        '</strong> <img width="20.5px" height="15.5px" src="https://d35aaqx5ub95lt.'\
-        'cloudfront.net/vendor/398e4298a3b39ce566050e5c041949ef.svg"></br>'
+    duolingo_line += f'Last Streak: <strong> {streak} </strong> <img'\
+            ' width="20.5px" height="15.5px" src="https://d35aaqx5ub95lt.'\
+            'cloudfront.net/vendor/398e4298a3b39ce566050e5c041949ef.svg"></br>'
 
-    lang_list = get_duloingo_info(data)
 
-    duolingo_line += """<table align="center"><tr><th>Language</th><th>Level</th><th>Experience</th></tr>"""
+    duolingo_line += """<table align="center"><tr><th>Language</th><th>Experience</th></tr>"""
     for lang in lang_list:
-        duolingo_line += f"""<tr><th>{lang[0]} </th><th><span><img width="20.5px" height="15.5px" src=\
-                "https://d35aaqx5ub95lt.cloudfront.net/vendor/b3ede3d53c932ee30d981064671c8032.svg"\
-                ><span>{lang[1]}</span></span></th><th><span><img width="20.5px" height="15.5px" src=\
+        duolingo_line += f"""<tr><th>{lang[1]} </th><th><span><img width="20.5px" height="15.5px" src=\
                 "https://d35aaqx5ub95lt.cloudfront.net/images/profile/01ce3a817dd01842581c3d18debcbc46.svg"\
-                ><span >{lang[2]}</span></span></th></tr>"""
+                ><span >{lang[0]}</span></span></th></tr>"""
     if (readme[duolingo_line_index] == duolingo_line):
         sys.exit(0)
     else:
@@ -49,5 +63,6 @@ def update_readme(data):
         file.writelines(readme)
 
 
+a, b = get_duolingo_info(duolingo_request())
+update_readme(a, b)
 
-update_readme(duolingo_request())

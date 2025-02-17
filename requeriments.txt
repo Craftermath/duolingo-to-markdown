@@ -1,1 +1,5 @@
-requests==2.25.1
+# duo env requirements
+
+requests==2.32.3
+beautifulsoup4==4.13.3
+
