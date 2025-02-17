@@ -10,7 +10,7 @@ inputs:
   DUOLINGO_LANGUAGE_LENGTH:
     description: 'How many language you want show.'
     required: false
-    default: '8'
+    default: '3'
 
   DUOLINGO_STREAK:
     description: 'Include streak duolingo.'
