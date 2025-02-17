@@ -30,21 +30,16 @@ jobs:
       - name: use duolingo account
         env:
           DUOLINGO_USERNAME: ${{ secrets.DUOLINGO_USERNAME }}
-          DUOLINGO_STREAK: true
-          DUOLINGO_LANGUAGE_LENGTH: 6
+          DUOLINGO_LANGUAGE_LENGTH: 8
         run: python duolingo-to-markdown.py
 
-      - name: commit changes
+      - name: commit and push changes
         continue-on-error: true
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add -A
           git commit -m "Updated duo-daily progress" -a
+          git push
         
-      - name: push changes
-        continue-on-error: true
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: main
