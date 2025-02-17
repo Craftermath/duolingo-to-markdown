@@ -30,7 +30,7 @@ jobs:
       - name: use duolingo account
         env:
           DUOLINGO_USERNAME: ${{ secrets.DUOLINGO_USERNAME }}
-          DUOLINGO_LANGUAGE_LENGTH: 8
+          DUOLINGO_LANGUAGE_LENGTH: 3
         run: python duolingo-to-markdown.py
 
       - name: commit changes
